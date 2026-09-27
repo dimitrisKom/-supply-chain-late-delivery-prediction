@@ -1,16 +1,30 @@
-🚚 Supply Chain Late Delivery Risk Prediction
-A machine learning pipeline built in KNIME Analytics Platform with Python (scikit-learn) to predict late delivery risk in supply chain shipment data.
+[README (1).md](https://github.com/user-attachments/files/32708660/README.1.md)
+# 🚚 Supply Chain Late Delivery Risk Prediction
 
-📌 Project Overview
+A machine learning pipeline built in **KNIME Analytics Platform** with **Python (scikit-learn)** to predict late delivery risk in supply chain shipment data.
+
+---
+
+## 📌 Project Overview
+
 Late deliveries are one of the most costly problems in logistics operations. This project builds an end-to-end predictive pipeline that ingests raw shipment data, preprocesses it, and trains multiple classification models to predict whether a shipment is at risk of being delivered late — enabling proactive decision-making in supply chain management.
 
-🔧 Tech Stack
-Tool	Purpose
-KNIME Analytics Platform 5.x	Workflow orchestration & data pipeline
-Python (scikit-learn)	Machine learning model training & evaluation
-SQL / SQLite	Data storage and querying
-pandas	Data manipulation
-🗂️ Pipeline Architecture
+---
+
+## 🔧 Tech Stack
+
+| Tool                         | Purpose                                      |
+| ---------------------------- | -------------------------------------------- |
+| KNIME Analytics Platform 5.x | Workflow orchestration & data pipeline       |
+| Python (scikit-learn)        | Machine learning model training & evaluation |
+| SQL / SQLite                 | Data storage and querying                    |
+| pandas                       | Data manipulation                            |
+
+---
+
+## 🗂️ Pipeline Architecture
+
+```
 CSV Reader
     │
     ▼
@@ -39,55 +53,82 @@ Classifier      Classifier       Classifier
                 ▼            ▼
            DB Writer    DB Query Readers
                         (Results retrieval)
-🤖 Models Trained
-All models use GridSearchCV for hyperparameter tuning and are evaluated on the following metrics:
+```
 
-Accuracy
-Precision
-Recall
-F1 Score
-Confusion Matrix
-Models
-Random Forest Classifier — ensemble method, robust to overfitting
-Decision Tree Classifier — interpretable baseline model
-Logistic Regression — linear baseline with StandardScaler normalization
-🎯 Target Variable
-Late_delivery_risk — Binary classification:
+---
 
-1 = Shipment is at risk of late delivery
-0 = Shipment is expected to arrive on time
-Features used (after preprocessing)
+## 🤖 Models Trained
+
+All models use **GridSearchCV** for hyperparameter tuning and are evaluated on the following metrics:
+
+- Accuracy
+- Precision
+- Recall
+- F1 Score
+- Confusion Matrix
+
+### Models
+
+1. **Random Forest Classifier** — ensemble method, robust to overfitting
+2. **Decision Tree Classifier** — interpretable baseline model
+3. **Logistic Regression** — linear baseline with StandardScaler normalization
+
+---
+
+## 🎯 Target Variable
+
+**`Late_delivery_risk`** — Binary classification:
+
+- `1` = Shipment is at risk of late delivery
+- `0` = Shipment is expected to arrive on time
+
+### Features used (after preprocessing)
+
 All relevant shipment features excluding data-leaking columns:
 
-Days for shipping (real)
-Days for shipment (scheduled)
-Delivery Status
-Order Id / Order Customer Id
-📊 Data
+- `Days for shipping (real)`
+- `Days for shipment (scheduled)`
+- `Delivery Status`
+- `Order Id` / `Order Customer Id`
+
+---
+
+## 📊 Data
+
 The dataset contains supply chain and e-commerce shipment records with features including shipping mode, customer location, product category, order details, and delivery outcomes.
 
-Data is loaded via CSV Reader node in KNIME. Place your dataset in the /data folder or update the CSV Reader path accordingly.
+> Data is loaded via CSV Reader node in KNIME. Place your dataset in the `/data` folder or update the CSV Reader path accordingly.
 
-📊 Results
+---
+
+## 📊 Results
+
 Three classification models were trained with GridSearchCV hyperparameter tuning. Results on the held-out test set:
 
-Algorithm	Accuracy	Precision	Recall	F1-Score
-Random Forest	69.23%	81.19%	57.10%	67.05%
-Logistic Regression	69.15%	84.22%	53.83%	65.68%
-Decision Tree	69.48%	83.30%	55.46%	66.59%
-Key findings:
+| Algorithm           | Accuracy | Precision | Recall | F1-Score |
+|----------------------|----------|-----------|--------|----------|
+| Random Forest         | 69.23%   | 81.19%    | 57.10% | 67.05%   |
+| Logistic Regression    | 69.15%   | 84.22%    | 53.83% | 65.68%   |
+| Decision Tree          | 69.48%   | 83.30%    | 55.46% | 66.59%   |
 
-All three models show high precision (>81%) but comparatively lower recall (~55%) — they're conservative, flagging late-delivery risk only when fairly confident, at the cost of missing some real delays.
-Feature importance analysis identified Shipping Mode (Standard Class) as the strongest predictor of late-delivery risk.
-Planned improvements:
+**Key findings:**
+- All three models show high precision (>81%) but comparatively lower recall (~55%) — they're conservative, flagging late-delivery risk only when fairly confident, at the cost of missing some real delays.
+- Feature importance analysis identified **Shipping Mode (Standard Class)** as the strongest predictor of late-delivery risk.
 
-Address class imbalance with class_weight='balanced' to improve recall (catch more true late deliveries).
-Extract Month from the order date to capture seasonality effects.
-Extend the pipeline with a dedicated fraud-detection model and K-Means-based automated customer segmentation.
-🗃️ SQL Analysis
+**Planned improvements:**
+- Address class imbalance with `class_weight='balanced'` to improve recall (catch more true late deliveries).
+- Extract `Month` from the order date to capture seasonality effects.
+- Extend the pipeline with a dedicated fraud-detection model and K-Means-based automated customer segmentation.
+
+---
+
+## 🗃️ SQL Analysis
+
 Two exploratory analyses were run directly against the SQLite database via KNIME's DB Query Reader nodes.
 
-Customer Segmentation (VIP / Standard / Loss-Making)
+### Customer Segmentation (VIP / Standard / Loss-Making)
+
+```sql
 SELECT "Order Customer Id",
        COUNT(DISTINCT "Order Id") AS "Total_Unique_Orders",
        COUNT("Order Item Id") AS Total_Items_Purchased,
@@ -103,13 +144,19 @@ FROM orders
 GROUP BY "Order Customer Id"
 HAVING COUNT(DISTINCT "Order Id") > 1
 ORDER BY Total_Profit DESC;
+```
+
 Sample output — top VIP customers by total profit:
 
-Order Customer Id	Total Orders	Total Profit ($)	Segment
-2,641	11	2,441.97	1. VIP Customer
-1,657	11	2,196.92	1. VIP Customer
-9,833	7	1,938.39	1. VIP Customer
-Fraud Risk by Region
+| Order Customer Id | Total Orders | Total Profit ($) | Segment        |
+|--------------------|--------------|-------------------|----------------|
+| 2,641               | 11           | 2,441.97          | 1. VIP Customer |
+| 1,657               | 11           | 2,196.92          | 1. VIP Customer |
+| 9,833               | 7            | 1,938.39          | 1. VIP Customer |
+
+### Fraud Risk by Region
+
+```sql
 SELECT "Order Region",
        COUNT("Order Item Id") AS Total_transactions,
        SUM(CASE WHEN "Order Status" = 'SUSPECTED_FRAUD' THEN 1 ELSE 0 END) AS Fraud_Cases,
@@ -119,14 +166,23 @@ FROM orders
 GROUP BY "Order Region"
 HAVING SUM(CASE WHEN "Order Status" = 'SUSPECTED_FRAUD' THEN 1 ELSE 0 END) > 0
 ORDER BY Value_At_Risk DESC;
+```
+
 Top 3 highest-risk regions:
 
-Order Region	Total Transactions	Fraud Rate (%)	Value At Risk ($)
-Western Europe	27,109	2.601	148,507.55
-Central America	28,341	2.226	126,740.04
-South America	14,935	2.417	71,856.88
-🐍 Python Code (from KNIME Python Script nodes)
-Data Exploration (Python Script #10)
+| Order Region     | Total Transactions | Fraud Rate (%) | Value At Risk ($) |
+|-------------------|---------------------|-----------------|---------------------|
+| Western Europe     | 27,109              | 2.601           | 148,507.55          |
+| Central America    | 28,341              | 2.226           | 126,740.04          |
+| South America      | 14,935              | 2.417           | 71,856.88           |
+
+---
+
+## 🐍 Python Code (from KNIME Python Script nodes)
+
+### Data Exploration (`Python Script #10`)
+
+```python
 import knime.scripting.io as knio
 import pandas as pd
 
@@ -136,7 +192,11 @@ unique = df.nunique()
 explore = pd.DataFrame({'Column': df.columns, 'Data Type': dtypes.astype(str), 'nunique': unique})
 explore = explore.sort_values(by='nunique', ascending=False)
 knio.output_tables[0] = knio.Table.from_pandas(explore)
-Random Forest Classifier (Python Script #4)
+```
+
+### Random Forest Classifier (`Python Script #4`)
+
+```python
 import knime.scripting.io as knio
 import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -186,7 +246,11 @@ importances = best_model.feature_importances_
 importance_df = pd.DataFrame({'column': X.columns, 'importance': importances})
 importance_df = importance_df.sort_values(by='importance', ascending=False)
 knio.output_tables[0] = knio.Table.from_pandas(importance_df)
-Decision Tree Classifier (Python Script #5)
+```
+
+### Decision Tree Classifier (`Python Script #5`)
+
+```python
 import knime.scripting.io as knio
 import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -238,7 +302,11 @@ importances = best_model.feature_importances_
 importance_df = pd.DataFrame({'column': X.columns, 'importance': importances})
 importance_df = importance_df.sort_values(by='importance', ascending=False)
 knio.output_tables[0] = knio.Table.from_pandas(importance_df)
-Logistic Regression (Python Script #6)
+```
+
+### Logistic Regression (`Python Script #6`)
+
+```python
 import pandas as pd
 import knime.scripting.io as knio
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -294,21 +362,47 @@ importance_df = pd.DataFrame({'column': X.columns, 'coefficient': importances})
 importance_df['abs_coefficient'] = importance_df['coefficient'].abs()
 importance_df = importance_df.sort_values(by='abs_coefficient', ascending=False)
 knio.output_tables[0] = knio.Table.from_pandas(importance_df)
-🚀 How to Run
-Install KNIME Analytics Platform (v5.x recommended)
-Install the KNIME Python Integration extension
-Make sure Python is configured in KNIME with the required libraries:
+```
+
+---
+
+## 🚀 How to Run
+
+1. Install [KNIME Analytics Platform](https://www.knime.com/downloads) (v5.x recommended)
+2. Install the **KNIME Python Integration** extension
+3. Make sure Python is configured in KNIME with the required libraries:
+
+```
 pip install pandas scikit-learn
-Open KNIME_project11.knwf in KNIME
-Update the CSV Reader node to point to your dataset
-Execute the workflow (Shift + F7)
-📁 Repository Structure
+```
+
+4. Open `KNIME_project11.knwf` in KNIME
+5. Update the CSV Reader node to point to your dataset
+6. Execute the workflow (Shift + F7)
+
+---
+
+## 📁 Repository Structure
+
+```
 📦 supply-chain-late-delivery-prediction
  ┣ 📄 KNIME_project11.knwf   ← Main KNIME workflow file
  ┣ 📁 data/                  ← Place your dataset here
  ┗ 📄 README.md
-👤 Author
-Dimitrios Komkoudis MSc Candidate in Supply Chain Management & Logistics | BSc Mathematics Aristotle University of Thessaloniki (AUTH) 📧 dkomkoud@gmail.com 🔗 LinkedIn
+```
 
-📄 License
-This project is open source and available under the MIT License.
+---
+
+## 👤 Author
+
+**Dimitrios Komkoudis**
+MSc Candidate in Supply Chain Management & Logistics | BSc Mathematics
+Aristotle University of Thessaloniki (AUTH)
+📧 <dkomkoud@gmail.com>
+🔗 [LinkedIn](https://www.linkedin.com/in/dimitrios-komkoudis-40488631a)
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](https://github.com/dimitrisKom/-supply-chain-late-delivery-prediction/blob/main/LICENSE).
