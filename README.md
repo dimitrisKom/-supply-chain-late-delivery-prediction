@@ -1,4 +1,3 @@
-[README (1).md](https://github.com/user-attachments/files/32708660/README.1.md)
 # 🚚 Supply Chain Late Delivery Risk Prediction
 
 A machine learning pipeline built in **KNIME Analytics Platform** with **Python (scikit-learn)** to predict late delivery risk in supply chain shipment data.
